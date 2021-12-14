@@ -145,10 +145,10 @@ def train_model(train_data, validate_data, num_epochs=200):
 
         print()
         # Save model
-        if epoch % 100 == 0 and epoch > 0:
+        if epoch % 50 == 0 and epoch > 0:
             checkpoint = {
                 'iteration': epoch,
-                'model': model.module.state_dict()}
+                'model': model.state_dict()}
 
             checkpoint_path = os.path.join(
                 checkpoints_dir, '{}_iterations.pth'.format(epoch))

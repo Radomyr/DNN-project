@@ -41,7 +41,15 @@ def extractions_images_and_annotatons():
 
 def dataset_creation(image_list):
     my_transform = transforms.Compose([transforms.Resize((226, 226)),
+                                       transforms.RandomRotation(degrees=(0, 180)),
+                                       transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
+                                       transforms.ColorJitter(brightness=.5, hue=.3),
+                                       transforms.RandomPerspective(distortion_scale=0.6, p=1.0),
+                                       transforms.RandomAdjustSharpness(sharpness_factor=2),
+                                       transforms.RandomAutocontrast(),
+                                       transforms.RandomEqualize(),
                                        transforms.ToTensor()])
+
     image_tensor = []
     label_tensor = []
     for i, j in enumerate(image_list):
@@ -73,6 +81,7 @@ def splitting_dataset_training_test(mydataset):
     print('Length of dataset is', len(mydataset), '\nLength of training set is :', train_size,
           '\nLength of test set is :', test_size)
     trainset, testset = torch.utils.data.random_split(mydataset, [train_size, test_size])
+
     train_dataloader = DataLoader(dataset=trainset, batch_size=batch_size, shuffle=True, num_workers=4)
     test_dataloader = DataLoader(dataset=testset, batch_size=batch_size, shuffle=True, num_workers=4)
 
@@ -83,4 +92,6 @@ if __name__ == '__main__':
     values, Items, img_names = extractions_images_and_annotatons()
 
     dataset = dataset_creation(img_names)
+    # transform_dataset = data_augumentation(dataset)
+
     splitting_dataset_training_test(dataset)
