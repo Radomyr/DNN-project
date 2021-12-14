@@ -177,7 +177,5 @@ def train_model(train_data, validate_data, num_epochs=200):
 
 
 if __name__ == '__main__':
-    values, Items, img_names = process_data_test.extractions_images_and_annotatons()
-    dataset = process_data_test.dataset_creation(img_names)
-    train_dataset, valid_dataset = process_data_test.splitting_dataset_training_test(dataset)
+    train_dataset, valid_dataset = process_data_test.splitting_dataset_training_test()
     model = train_model(train_dataset, valid_dataset, 500)

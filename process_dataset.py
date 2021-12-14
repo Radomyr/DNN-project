@@ -6,13 +6,14 @@ import os
 
 def cropAndSave(image, root, category, coordinates, counter):
     im1 = image.crop(coordinates)
-    filepath = image.filename.split("original dataset")[0]
-    newname = root.find("./filename").text.split(".")[0] + "_" + str(counter) + ".png"
-    path = os.path.join(filepath, f"Processed Dataset\{category}")
-    os.makedirs(path, exist_ok=True)
-    # width, height = im1.size
-    # if (width > 50 and height > 50):
-    im1.save(f"{path}\{newname}")
+    width, height = im1.size
+    if (width > 15 and height > 15):
+        filepath = image.filename.split("original dataset")[0]
+        newname = root.find("./filename").text.split(".")[0] + "_" + str(counter) + ".png"
+        path = os.path.join(filepath, f"Processed Dataset\{category}")
+        os.makedirs(path, exist_ok=True)
+        # width, height = im1.size
+        im1.save(f"{path}\{newname}")
 
 
 def nameFromXml(xmlName, workingDirect):
