@@ -2,15 +2,17 @@ import copy
 import logging
 import os
 import time
+from torchvision import datasets, transforms
 
 import torch
 from torch import nn, optim
 from torchvision import models
 import process_data_test
+
 from utils.config import batch_size
 from torch.optim import lr_scheduler
 
-EXERCISE = "2A"
+EXERCISE = "2B"
 
 
 def create_folder(fd):
@@ -37,7 +39,7 @@ def train_model(train_data, validate_data, num_epochs=200):
 
     for child in model.children():
         ct += 1
-        if ct < 16:
+        if ct < 15:
             for param in child.parameters():
                 param.requires_grad = False
         else:
@@ -145,7 +147,7 @@ def train_model(train_data, validate_data, num_epochs=200):
 
         print()
         # Save model
-        if epoch % 50 == 0 and epoch > 0:
+        if epoch % 100 == 0 and epoch > 0:
             checkpoint = {
                 'iteration': epoch,
                 'model': model.state_dict()}
@@ -176,6 +178,51 @@ def train_model(train_data, validate_data, num_epochs=200):
     return model
 
 
+def test_model(iteration):
+
+    checkpoint_path = f"checkpoints/exercise={EXERCISE}/loss_type=SGD/batch_size={batch_size}/{iteration}_iterations.pth"
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    model = models.googlenet(pretrained=True)
+    ct = 0
+    #
+    # for child in model.children():
+    #     ct += 1
+    #     if ct < 16:
+    #         for param in child.parameters():
+    #             param.requires_grad = False
+    #     else:
+    #         for param in child.parameters():
+    #             param.requires_grad = True
+
+    # Define n_inputs takes the same number of inputs from pre-trained model
+    n_inputs = model.fc.in_features  # refer to the fully connected layer only
+
+    # Add last linear layer (n_inputs -> 4 classes). In this case the ouput is 4 classes
+    # New layer automatically has requires_grad = True
+    last_layer = nn.Linear(n_inputs, len(process_data_test.options.items()), bias=True)
+    model.fc = last_layer
+
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(checkpoint['model'])
+
+    # Parallel
+    if 'cuda' in str(device):
+        model.to(device)
+        print('GPU number: {}'.format(torch.cuda.device_count()))
+    else:
+        print('Using CPU.')
+
+    predict = []
+    original_labels = []
+    # for test_folder in os.listdir("test_data"):
+    dataset = datasets.ImageFolder('test_data', transform=process_data_test.my_transform)
+    for image, label in dataset:
+        print(12)
+        with torch.no_grad():
+            model.eval()
+            batch_output_dict = model(image)
+
 if __name__ == '__main__':
     train_dataset, valid_dataset = process_data_test.splitting_dataset_training_test()
-    model = train_model(train_dataset, valid_dataset, 500)
+    model = train_model(train_dataset, valid_dataset, 1000)
+    # test_model(100)

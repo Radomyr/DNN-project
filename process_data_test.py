@@ -11,17 +11,17 @@ from utils.config import batch_size, train_dataset_size
 path_image = "original dataset/images/"
 path_annotations = "original dataset/annotations/"
 options = {"with_mask": 0, "without_mask": 1, "mask_weared_incorrect": 2}
-
+my_transform = transforms.Compose([transforms.Resize((226, 226)),
+                                   transforms.RandomRotation(degrees=(0, 180)),
+                                   transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
+                                   transforms.ColorJitter(brightness=.5, hue=.3),
+                                   transforms.RandomAdjustSharpness(sharpness_factor=2),
+                                   transforms.RandomAutocontrast(),
+                                   transforms.RandomEqualize(),
+                                   transforms.ToTensor()])
 
 def splitting_dataset_training_test():
-    my_transform = transforms.Compose([transforms.Resize((226, 226)),
-                                       transforms.RandomRotation(degrees=(0, 180)),
-                                       transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
-                                       transforms.ColorJitter(brightness=.5, hue=.3),
-                                       transforms.RandomAdjustSharpness(sharpness_factor=2),
-                                       transforms.RandomAutocontrast(),
-                                       transforms.RandomEqualize(),
-                                       transforms.ToTensor()])
+
     mydataset = datasets.ImageFolder("Processed Dataset", transform=my_transform)
     train_size = int(len(mydataset) * train_dataset_size)
     test_size = len(mydataset) - train_size
